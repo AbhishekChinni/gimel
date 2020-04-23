@@ -90,7 +90,7 @@ object APIUsageKafkaProduceConsume extends App {
     * Below will return "true"
     */
 
-  val isAlreadyCheckPointed = kafkaOperator.alreadyCheckPointed
+  // val isAlreadyCheckPointed = kafkaOperator.alreadyCheckPointed
 
   /**
     * Second call on CheckPoint function will not perform any save but throw a warning message to user -
@@ -112,7 +112,7 @@ object APIUsageKafkaProduceConsume extends App {
   val df: DataFrame = sqlContext.read.json(rdd)
 
   // Get a List of Supported Systems for DataSet Operations
-  val systemType = DataSetType
+  // val systemType = DataSetType
 
   // DataSet Write API Call
   dataSet.write(datasetName, df)

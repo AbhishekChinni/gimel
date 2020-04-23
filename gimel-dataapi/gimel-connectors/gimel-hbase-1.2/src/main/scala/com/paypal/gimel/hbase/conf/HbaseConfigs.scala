@@ -24,17 +24,18 @@ object HbaseConfigs {
   // metastore properties
   val hbaseTableKey: String = "gimel.hbase.table.name"
   val hbaseColumnMappingKey: String = "gimel.hbase.columns.mapping"
+  val hbaseNamespaceKey = "gimel.hbase.namespace.name"
+
   // misc properties for read/write
   val hbaseStorageHandler: String = "org.apache.hadoop.hive.hbase.HBaseStorageHandler"
   val hbaseOperation: String = "gimel.hbase.operation"
   val hbaseFilter: String = "gimel.hbase.get.filter"
   val hbaseRowKey: String = "gimel.hbase.rowkey"
-  // polling properties
-  val hbaseScanMaxResultsKey: String = "gimel.hbase.scan.max.results"
-  val hbaseSiteXMLPathKey: String = "gimel.hbase.site.xml.path"
+  val hbaseColumnNamewithColumnFamilyAppended: String = "gimel.hbase.colName.with.cfName.appended"
   val hbaseSiteXMLHDFSPathKey: String = "gimel.hbase.site.xml.hdfs.path"
-  val hbaseUseColumnsSpecifiedFlag: String = "gimel.hbase.columns.specified.flag"
-  val hbasePollingBlackListTables: String = "chufan_indexing,hbase,nrt_network_another_1_0,sre_mm,test"
-  val hbasePollingBlackListKey: String = "gimel.hbase.polling.blacklist"
+  val hbaseMaxRecordsForSchema: String = "gimel.hbase.schema.max.records"
+  val hbaseMaxColumnsForSchema: String = "gimel.hbase.schema.max.columns"
+
 }
+
 

@@ -24,6 +24,7 @@ import scala.reflect.runtime.universe._
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
+import com.paypal.gimel.common.catalog.DataSetProperties
 import com.paypal.gimel.common.conf.GimelConstants
 import com.paypal.gimel.datasetfactory.GimelDataSet
 import com.paypal.gimel.hive.utilities.HiveUtils
@@ -35,9 +36,11 @@ class DataSet(sparkSession: SparkSession) extends GimelDataSet(sparkSession: Spa
   val logger = Logger()
   logger.info(s"Initiated --> ${this.getClass.getName}")
 
+  val hiveUtils = new HiveUtils
+
   /**
     *
-    * @param dataset Name of the PCatalog Data Set
+    * @param dataset Name of the UDC Data Set
     * @param dataSetProps
     *                props is the way to set various additional parameters for read and write operations in DataSet class
     *                Example Usecase : to get 10 factor parallelism (specifically)
@@ -50,13 +53,26 @@ class DataSet(sparkSession: SparkSession) extends GimelDataSet(sparkSession: Spa
     if (dataSetProps.isEmpty) {
       throw new DataSetOperationException("Props Cannot Be Empty !")
     }
-    val dataSet: String = dataSetProps(GimelConstants.RESOLVED_HIVE_TABLE).toString
-    sparkSession.read.table(dataSet)
+    val datasetProps: DataSetProperties = dataSetProps(GimelConstants.DATASET_PROPS).asInstanceOf[DataSetProperties]
+
+    val checkPCatalogDB = hiveUtils.checkIfCatalogTable(dataset);
+    if (checkPCatalogDB) {
+      if (!hiveUtils.isCrossCluster(datasetProps)) {
+        val hiveDataSetName = datasetProps.props(GimelConstants.HIVE_DATABASE_NAME) + "." + datasetProps.props(GimelConstants.HIVE_TABLE_NAME)
+        sparkSession.read.table(hiveDataSetName)
+      } else {
+        logger.info("Cross Cluster Read Detected !")
+        val hdfsDataSet = new com.paypal.gimel.hdfs.DataSet(sparkSession)
+        hdfsDataSet.read(dataset, dataSetProps)
+      }
+    } else {
+      sparkSession.read.table(dataset)
+    }
   }
 
   /**
     *
-    * @param dataset   Name of the PCatalog Data Set
+    * @param dataset   Name of the UDC Data Set
     * @param dataFrame The DataFrame to Write into Target
     * @param dataSetProps
     *                  props is the way to set various additional parameters for read and write operations in DataSet class
@@ -68,11 +84,13 @@ class DataSet(sparkSession: SparkSession) extends GimelDataSet(sparkSession: Spa
     */
 
   override def write(dataset: String, dataFrame: DataFrame, dataSetProps: Map[String, Any]): DataFrame = {
+    def MethodName: String = new Exception().getStackTrace.apply(1).getMethodName
+    logger.info(" @Begin --> " + MethodName)
+
     if (dataSetProps.isEmpty) {
       throw new DataSetOperationException("Props Cannot Be Empty!")
     }
     val dataSet: String = dataSetProps(GimelConstants.RESOLVED_HIVE_TABLE).toString
-    val hiveUtils = new HiveUtils
     hiveUtils.write(dataSet, dataFrame, sparkSession, dataSetProps)
   }
 
@@ -83,7 +101,7 @@ class DataSet(sparkSession: SparkSession) extends GimelDataSet(sparkSession: Spa
   /**
     * Function writes a given dataframe to the actual Target System (Example Hive : DB.Table | HBASE namespace.Table)
     *
-    * @param dataset Name of the PCatalog Data Set
+    * @param dataset Name of the UDC Data Set
     * @param rdd     The RDD[T] to write into Target
     *                Note the RDD has to be typeCast to supported types by the inheriting DataSet Operators
     *                instance#1 : ElasticSearchDataSet may support just RDD[Seq(Map[String, String])], so Elastic Search must implement supported Type checking
@@ -96,6 +114,8 @@ class DataSet(sparkSession: SparkSession) extends GimelDataSet(sparkSession: Spa
     * @return RDD[T]
     */
   def write[T: TypeTag](dataset: String, rdd: RDD[T], dataSetProps: Map[String, Any]): RDD[T] = {
+    def MethodName: String = new Exception().getStackTrace.apply(1).getMethodName
+    logger.info(" @Begin --> " + MethodName)
 
     if (!supportedTypesOfRDD.contains(typeOf[T].toString)) {
       throw new UnsupportedOperationException(s"""Invalid RDD Type. Supported Types : ${supportedTypesOfRDD.mkString(" | ")}""")
@@ -105,6 +125,58 @@ class DataSet(sparkSession: SparkSession) extends GimelDataSet(sparkSession: Spa
     }
   }
 
+  /**
+    *
+    * @param dataset Name of the UDC Data Set
+    * @param dataSetProps
+    *                * @return Boolean
+    */
+  override def create(dataset: String, dataSetProps: Map[String, Any]): Unit = {
+    def MethodName: String = new Exception().getStackTrace.apply(1).getMethodName
+    logger.info(" @Begin --> " + MethodName)
+
+    hiveUtils.create(dataset, dataSetProps, sparkSession)
+  }
+
+  /**
+    *
+    * @param dataset Name of the UDC Data Set
+    * @param dataSetProps
+    *                * @return Boolean
+    */
+  override def drop(dataset: String, dataSetProps: Map[String, Any]): Unit = {
+    def MethodName: String = new Exception().getStackTrace.apply(1).getMethodName
+    logger.info(" @Begin --> " + MethodName)
+
+    hiveUtils.drop(dataset, dataSetProps, sparkSession)
+  }
+
+  /**
+    *
+    * @param dataset Name of the UDC Data Set
+    * @param dataSetProps
+    *                * @return Boolean
+    */
+  override def truncate(dataset: String, dataSetProps: Map[String, Any]): Unit = {
+    def MethodName: String = new Exception().getStackTrace.apply(1).getMethodName
+    logger.info(" @Begin --> " + MethodName)
+
+    hiveUtils.truncate(dataset, dataSetProps, sparkSession)
+  }
+
+  /**
+    * Save Checkpoint
+    */
+  override def clearCheckPoint(): Unit = {
+    logger.info(s"Clear check Point functionality is not available for Hive Dataset")
+  }
+
+  /**
+    * Clear Checkpoint
+    */
+  override  def saveCheckPoint(): Unit = {
+    logger.info(s"Save check Point functionality is not available for Hive Dataset")
+  }
 }
 
 /**

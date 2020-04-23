@@ -23,19 +23,19 @@ under the License.
   <parent>
     <artifactId>gimel-dataapi</artifactId>
     <groupId>com.paypal.gimel</groupId>
-    <version>1.2.0-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>gimel-tools</artifactId>
-  <version>1.2.0-SNAPSHOT</version>
+  <version>2.0.0-SNAPSHOT</version>
 
   <dependencies>
     <dependency>
       <groupId>com.paypal.gimel</groupId>
       <artifactId>gimel-sql</artifactId>
-      <version>1.2.0-SNAPSHOT</version>
+      <version>${gimel.version}-SNAPSHOT</version>
       <exclusions>
         <exclusion>
           <groupId>org.scala-lang</groupId>
@@ -74,6 +74,19 @@ under the License.
               </excludes>
             </filter>
           </filters>
+          <!--
+          For spark-sql-kafka data source to work we have to ensure that
+          META-INF/services/org.apache.spark.sql.sources.DataSourceRegister
+          of all the data sources are merged.
+          Without this it gets overwritten by similar file which is present in spark-sql jar.
+          -->
+          <transformers>
+            <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+              <resource>
+                META-INF/services/org.apache.spark.sql.sources.DataSourceRegister
+              </resource>
+            </transformer>
+          </transformers>
         </configuration>
         <executions>
           <execution>

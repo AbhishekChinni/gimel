@@ -138,6 +138,50 @@ class DataSet(sparkSession: SparkSession) extends GimelDataSet(sparkSession: Spa
     }
     rdd
   }
+
+  /**
+    *
+    * @param dataset   Name of the UDC Data Set
+    * @param dataSetProps
+    * * @return Boolean
+    */
+  override def create(dataset: String, dataSetProps: Map[String, Any]): Unit = {
+    throw new Exception(s"DataSet create for kafka currently not Supported")
+  }
+
+  /**
+    *
+    * @param dataset   Name of the UDC Data Set
+    * @param dataSetProps
+    * * @return Boolean
+    */
+  override def drop(dataset: String, dataSetProps: Map[String, Any]): Unit = {
+    throw new Exception(s"DataSet drop for kafka currently not Supported")
+  }
+
+  /**
+    *
+    * @param dataset   Name of the UDC Data Set
+    * @param dataSetProps
+    * * @return Boolean
+    */
+  override def truncate(dataset: String, dataSetProps: Map[String, Any]): Unit = {
+    throw new Exception(s"DataSet truncate for kafka currently not Supported")
+  }
+
+  /**
+    * Save Checkpoint
+    */
+  override def clearCheckPoint(): Unit = {
+    logger.info(s"Clear check Point functionality is not available for Rest API Dataset")
+  }
+
+  /**
+    * Clear Checkpoint
+    */
+  override  def saveCheckPoint(): Unit = {
+    logger.info(s"Save check Point functionality is not available for Rest API Dataset")
+  }
 }
 
 /**

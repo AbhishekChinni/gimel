@@ -17,10 +17,14 @@
 
 package com.paypal.gimel.logging.utils;
 
-
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.apache.spark.SparkFiles;
 
 import com.paypal.gimel.logging.Constants;
 
@@ -28,6 +32,8 @@ public class Configuration {
 
   private static Configuration instance = null;
   private Properties properties = null;
+  private final Logger logger = LogManager.getLogger(this.getClass().toString());
+
   /**
    * It's a singleton class. Use {@link #getInstance()}
    */
@@ -43,14 +49,21 @@ public class Configuration {
   }
 
   /**
-   * Read the configuration file  scaasConfig.properties, and load to properties
+   * Read the configuration file  gimelLoggerConfig.properties, and load to properties
    */
 
   public void readConfiguration() {
     properties = new Properties();
     try {
-      String fileName = "/scaasConfig.properties";
-      final InputStream configStream = this.getClass().getResourceAsStream(fileName);
+      this.logger.debug("Reading gimel logger properties.");
+      String filePathDefault = "/gimelLoggerConfig.properties";
+      InputStream configStream;
+      if (System.getProperty(Constants.GIMEL_LOGGER_PROPERTIES_FILEPATH_KEY) == null) {
+        configStream = this.getClass().getResourceAsStream(filePathDefault);
+      } else {
+        String filePathPropertyValue = (String) SparkFiles.get(System.getProperty(Constants.GIMEL_LOGGER_PROPERTIES_FILEPATH_KEY));
+        configStream = new FileInputStream(filePathPropertyValue);
+      }
       properties.load(configStream);
       configStream.close();
     } catch (IOException e) {
@@ -63,7 +76,7 @@ public class Configuration {
   }
 
   /**
-   * From the configuration file scaasConfig.properties, it reads the kafka properties and returns as properties
+   * From the configuration file gimelLoggerConfig.properties, it reads the kafka properties and returns as properties
    */
   public Properties getKafkaProperties() {
     Properties props = new Properties();
@@ -77,7 +90,7 @@ public class Configuration {
   }
 
   /**
-   * From the configuration file scaasConfig.properties, it reads the topics and returns as properties
+   * From the configuration file gimelLoggerConfig.properties, it reads the topics and returns as properties
    */
   public Properties getKafkaTopics() {
     Properties props = new Properties();
@@ -89,6 +102,4 @@ public class Configuration {
     }
     return props;
   }
-
-
 }

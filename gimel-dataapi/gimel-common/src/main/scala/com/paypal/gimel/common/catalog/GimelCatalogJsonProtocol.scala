@@ -27,5 +27,4 @@ import spray.json._
 object GimelCatalogJsonProtocol extends DefaultJsonProtocol {
   implicit val field: RootJsonFormat[Field] = jsonFormat5(Field)
   implicit val dataSetProps: RootJsonFormat[DataSetProperties] = jsonFormat4(DataSetProperties)
-
 }

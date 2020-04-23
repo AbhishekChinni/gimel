@@ -104,9 +104,53 @@ class DataSet(sparkSession: SparkSession) extends GimelDataSet(sparkSession: Spa
     * @param dataSetProps The given properties
     * @return RDD[T]
     */
-  override def write[T: universe.TypeTag](dataset: String, anyRDD: RDD[T], dataSetProps: Map[String, Any]): RDD[T] = {
+  def write[T: universe.TypeTag](dataset: String, anyRDD: RDD[T], dataSetProps: Map[String, Any]): RDD[T] = {
     // TODO
     anyRDD
+  }
+
+  /**
+    *
+    * @param dataset   Name of the UDC Data Set
+    * @param dataSetProps
+    * * @return Boolean
+    */
+  override def create(dataset: String, dataSetProps: Map[String, Any]): Unit = {
+    throw new Exception(s"DataSet create for jdbc currently not Supported")
+  }
+
+  /**
+    *
+    * @param dataset   Name of the UDC Data Set
+    * @param dataSetProps
+    * * @return Boolean
+    */
+  override def drop(dataset: String, dataSetProps: Map[String, Any]): Unit = {
+    throw new Exception(s"DataSet drop for jdbc currently not Supported")
+  }
+
+  /**
+    *
+    * @param dataset   Name of the UDC Data Set
+    * @param dataSetProps
+    * * @return Boolean
+    */
+  override def truncate(dataset: String, dataSetProps: Map[String, Any]): Unit = {
+    throw new Exception(s"DataSet truncate for jdbc currently not Supported")
+  }
+
+  /**
+    * Save Checkpoint
+    */
+  override def clearCheckPoint(): Unit = {
+    logger.info(s"Clear check Point functionality is not available for JDBC Dataset")
+  }
+
+  /**
+    * Clear Checkpoint
+    */
+  override  def saveCheckPoint(): Unit = {
+    logger.info(s"Save check Point functionality is not available for JDBC Dataset")
   }
 }
 
